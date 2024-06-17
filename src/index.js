@@ -1,4 +1,4 @@
-///  Victor Campos - Backend Projeto FINAL 
+/// Backend Projeto FINAL 
 
 /// Exports
 
@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt') /// incriptação
 const jwt = require('jsonwebtoken'); /// jwt
 const  Sequelize = require('sequelize'); /// migração do banco
 const express = require('express'); /// servidor
+const cors = require('cors');
 
 /// conexão com o banco
 
@@ -26,6 +27,8 @@ const Matr = require('./models/Matri'); /// cria a tabela Matricula
 const app = express()
 app.use(express.json())
 
+app.use(cors());
+
 const port = 3005;
 
 
@@ -44,7 +47,7 @@ app.use('/departamentos', departamentoRoutes);
     try {
         await database.sync();
         app.listen(port, () => {
-            console.log('Servidor conectado');
+            console.log(`Servidor conectado em http://localhost:${port}`);
         });
     } catch (error) {
         console.error('Erro ao iniciar o servidor:', error);

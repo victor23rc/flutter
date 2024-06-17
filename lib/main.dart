@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -8,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Formulário',
+      title: 'Cadastro de Fornecedor',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -24,33 +26,49 @@ class MyHomePage extends StatelessWidget {
   final TextEditingController _enderecoController = TextEditingController();
   final TextEditingController _departamentoController = TextEditingController();
 
-  void _submitForm(BuildContext context) {
+  Future<void> _submitForm(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      // Process data
       String nome = _nomeController.text;
       String cpf = _cpfController.text.replaceAll('.', '').replaceAll('-', '');
       String endereco = _enderecoController.text;
       int departamentoID = int.parse(_departamentoController.text);
 
-      // Montar o objeto JSON para enviar para a API
-      var professorData = {
-        "nome": nome,
-        "cpf": cpf,
-        "endereco": endereco,
-        "departamentoID": departamentoID,
-      };
+      var url = Uri.parse('http://localhost:3005/professores/register'); 
 
-      // Exibir mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Professor cadastrado com sucesso!')),
-      );
+      try {
+        var response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'nome': nome,
+            'cpf': cpf,
+            'endereco': endereco,
+            'departamentoID': departamentoID,
+          }),
+        );
 
-      // Limpar o formulário
-      _formKey.currentState!.reset();
-      _nomeController.clear();
-      _cpfController.clear();
-      _enderecoController.clear();
-      _departamentoController.clear();
+        if (response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Professor cadastrado com sucesso!')),
+          );
+
+          // Limpar o formulário
+          _formKey.currentState!.reset();
+          _nomeController.clear();
+          _cpfController.clear();
+          _enderecoController.clear();
+          _departamentoController.clear();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro ao cadastrar professor')),
+          );
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao cadastrar professor')),
+        );
+        print('Erro: $error');
+      }
     }
   }
 
@@ -58,7 +76,7 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Formulário'),
+        title: Text('Cadastro de Professor'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
